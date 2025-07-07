@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://www.misskatecuttables.com/uploads/shopping_cart/12423/large_just-peachy.png" type="image/png">
+    <title>Mental Health AI Companion</title>
+ <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffd6cc 0%, #ffb3ba 50%, #ffd1dc 100%);
+            min-height: 100vh;
+            color: #5a4a42;
+            overflow-x: hidden;
+            font-size: 10px;
+            /* Force consistent rendering */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+      
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            position: relative;
+            /* Ensure consistent flexbox behavior */
+            width: 100%;
+        }
+        
+        .sidebar {
+            width: 320px;
+            min-width: 320px; /* Prevent shrinking */
+            background: linear-gradient(180deg, #ff6b6b 0%, #ff8e8e 25%, #ffa07a 50%, #ffb3ba 75%, #ffd1dc 100%);
+            border-right: 1px solid rgba(255,255,255,0.3);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 
+                2px 0 20px rgba(0,0,0,0.15),
+                inset -1px 0 0 rgba(255,255,255,0.3);
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            position: relative;
+            overflow: hidden;
+            /* Ensure visibility by default */
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Cross-browser compatibility for animations */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 70%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            animation: backgroundPulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%),
+                linear-gradient(-45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            animation: shimmer 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            border: none;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .sidebar-content {
+            position: relative;
+            z-index: 10;
+            padding: 25px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            color: #fff;
+            margin-bottom: 25px;
+            font-size: clamp(1.2rem, 3vw, 1.9rem);
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .sidebar h2::before {
+            content: "🍑";
+            font-size: 1.4em;
+            animation: bounce 2s infinite;
+        }
+
+        .sidebar h2::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(45deg, #ff4757, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: clamp(1.2rem, 2vw, 1.4rem);
+            margin-bottom: 25px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(255,71,87,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .new-chat-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .new-chat-btn:hover::before {
+            left: 100%;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 35px rgba(255,71,87,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            background: linear-gradient(45deg, #ff3742, #ff5252, #ff7979);
+        }
+
+        .new-chat-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            position: relative;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #f77f7f, #eb8383);
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff5252, #ff7979);
+        }
+
+        .history-item {
+            padding: 15px;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: #9e1515b6;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .history-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .history-item:hover::before {
+            left: 100%;
+        }
+
+        .history-item:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .history-item:active {
+            transform: translateX(4px) scale(0.98);
+        }
+
+        .history-item.active {
+            background: rgba(255,255,255,0.5);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.2),
+                inset 0 2px 4px rgba(0,0,0,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+            /* Chatbot by Zahra credit */
+        .chatbot-credit {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+            background: rgba(240, 131, 104, 0.932);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .chatbot-credit p {
+            color:white;
+            font-size: clamp(1.3rem, 1.5vw, 0.9rem);
+            font-weight: 500;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            margin: 0;
+        }
+          .chatbot-credit:hover {
+            background: rgb(245, 130, 130);
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        /* Floating elements in sidebar */
+        .sidebar-decorations {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .floating-element {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: floatSidebar 8s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 35%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 25%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .floating-element:nth-child(4) {
+            bottom: 45%;
+            right: 10%;
+            animation-delay: 6s;
+        }
+
+        @keyframes floatSidebar {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translateY(-15px) rotate(5deg);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateY(-10px) rotate(-3deg);
+                opacity: 0.7;
+            }
+            75% {
+                transform: translateY(-20px) rotate(3deg);
+                opacity: 0.4;
+            }
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #fff5f3 0%, #ffe8e1 100%);
+            min-width: 0;
+            transition: margin-left 0.3s ease;
+            /* Ensure it takes remaining space */
+            width: 100%;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #ffcab0 0%, #ffd4c4 50%, #ffb3ba 100%);
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 70px;
+            /* Ensure consistent height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Floating Peaches Animation */
+        .floating-peach {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-peach:nth-child(1) {
+            top: 10px;
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 5s;
+        }
+
+        .floating-peach:nth-child(2) {
+            top: 20px;
+            right: 15%;
+            animation-delay: 1s;
+            animation-duration: 7s;
+        }
+
+        .floating-peach:nth-child(3) {
+            bottom: 15px;
+            left: 20%;
+            animation-delay: 2s;
+            animation-duration: 6s;
+        }
+
+        .floating-peach:nth-child(4) {
+            bottom: 10px;
+            right: 10%;
+            animation-delay: 3s;
+            animation-duration: 8s;
+        }
+
+        .floating-peach:nth-child(5) {
+            top: 50%;
+            left: 5%;
+            animation-delay: 4s;
+            animation-duration: 5.5s;
+        }
+
+        .floating-peach:nth-child(6) {
+            top: 60%;
+            right: 5%;
+            animation-delay: 2.5s;
+            animation-duration: 6.5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) translateX(0px) rotate(0deg);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(-10px) translateX(5px) rotate(5deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-5px) translateX(-5px) rotate(-3deg);
+                opacity: 0.9;
+            }
+            75% {
+                transform: translateY(-15px) translateX(3px) rotate(2deg);
+                opacity: 0.7;
+            }
+        }
+
+        /* Header Content Styling */
+        .header-content {
+            position: relative;
+            z-index: 10;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+ .chat-header h1 {
+            color: #8b4513;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes titleGlow {
+            from {
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            }
+            to {
+                text-shadow: 2px 2px 8px rgba(255,182,193,0.5), 0 0 20px rgba(255,182,193,0.3);
+            }
+        }
+
+          .chat-header p {
+            color: #a0522d;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .sidebar-toggle {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #ffa7a7ef, #fca0a0);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #f7a9a9, #fa9b9b);
+        }
+
+        .sidebar-toggle.sidebar-hidden {
+            left: 10px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="grad1" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.1);stop-opacity:1" /><stop offset="100%" style="stop-color:rgba(255,255,255,0);stop-opacity:1" /></radialGradient></defs><circle cx="20" cy="20" r="2" fill="url(%23grad1)"/><circle cx="80" cy="40" r="1.5" fill="url(%23grad1)"/><circle cx="40" cy="80" r="1" fill="url(%23grad1)"/><circle cx="70" cy="70" r="1.5" fill="url(%23grad1)"/></svg>');
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #f8a699;
+            border-radius: 10px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+           .user-message .message-content {
+            background: linear-gradient(45deg, #cd5c5c, #ff6b6b);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 20px 20px 4px 20px;
+            display: inline-block;
+            max-width: 70%;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+            .ai-message .message-content {
+            background: linear-gradient(45deg, #ffffff, #fff5f3);
+            color: #5a4a42;
+            padding: 12px 16px;
+            border-radius: 20px 20px 20px 4px;
+            display: inline-block;
+            max-width: 85%;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #ff9a8b;
+        }
+
+        
+        .input-area {
+            padding: 15px;
+            background: linear-gradient(90deg, #ffcab0, #ffd4c4);
+            border-top: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+   .input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.9);
+            color: #5a4a42;
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            outline: none;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .input-area input::placeholder {
+            color: #a0522d;
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #d2691e, #ff6347);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-width: 60px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6347, #d2691e);
+        }
+
+        .techniques-section {
+            background: linear-gradient(45deg, #fff5f3, #ffe8e1);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 8px;
+            border-left: 4px solid #ff9a8b;
+        }
+
+        .techniques-section h4 {
+            color: #8b4513;
+            margin-bottom: 8px;
+            font-size: clamp(1.3rem, 2.5vw, 1.5rem);
+        }
+
+        .techniques-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .techniques-section li {
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,154,139,0.3);
+             font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+        }
+
+        .techniques-section li:last-child {
+            border-bottom: none;
+        }
+
+         .typing-indicator {
+            display: none;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 20px;
+            margin-bottom: 15px;
+            max-width: 70px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff9a8b;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+                min-width: 280px;
+            }
+            
+            .sidebar-content {
+                padding: 20px;
+            }
+            
+              .sidebar h2 {
+                font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+                margin-bottom: 20px;
+                padding: 12px;
+            }
+            
+             .new-chat-btn {
+                font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+                padding: 10px 16px;
+            }
+            
+            .history-item {
+                font-size: clamp(0.8rem, 2vw, 1rem);
+                padding: 10px;
+            }
+            
+            .floating-element {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 220px;
+                min-width: 220px;
+            }
+            
+            .sidebar-content {
+                padding: 15px;
+            }
+            
+             .sidebar h2 {
+                font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+                margin-bottom: 15px;
+                padding: 10px;
+            }
+              .new-chat-btn {
+                font-size: clamp(0.8rem, 2.5vw, 1rem);
+                padding: 8px 12px;
+            }
+            
+             .history-item {
+                font-size: clamp(0.7rem, 2vw, 0.9rem);
+                padding: 8px;
+            }
+            
+            .floating-element {
+                font-size: 0.9rem;
+            }
+
+            .chatbot-credit p {
+                font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+            }
+        }
+
+        /* Force consistent initial state */
+        .sidebar:not(.hidden) {
+            display: flex !important;
+            opacity: 1 !important;
+            transform: translateX(0) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-decorations">
+                <div class="floating-element">✨</div>
+                <div class="floating-element">🌟</div>
+                <div class="floating-element">💫</div>
+                <div class="floating-element">⭐</div>
+                <div class="floating-element">🦋</div>
+                <div class="floating-element">🌸</div>
+                <div class="floating-element">🍑</div>
+            </div>
+            
+             <div class="sidebar-content">
+                <h2>Mental Health AI</h2>
+                <button class="new-chat-btn" onclick="newChat()">+ New Chat</button>
+                <div class="chat-history" id="chatHistory">
+                    <div class="history-item active" onclick="loadHistory(0)">Welcome Session</div>
+                </div>
+                <a href="mailto:zahratufailofficial@gmail.com" style="text-decoration: none; color: inherit;">
+                <div class="chatbot-credit">
+                    <p>Chatbot By Zahra</p>
+                      <p>zahratufailofficial@gmail.com</p>
+                </div>
+                </a>
+            </div>
+        </div>
+        <div class="main-chat">
+            <div class="chat-header" id="chatHeader">
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+                
+                <!-- Floating Peaches -->
+                <div class="floating-peach">🍑</div>
+                <div class="floating-peach">🍑</div>
+                <div class="floating-peach">🍑</div>
+                <div class="floating-peach">🍑</div>
+                <div class="floating-peach">🍑</div>
+                <div class="floating-peach">🍑</div>
+                
+                <!-- Sparkles -->
+                <div class="sparkle" style="top: 20%; left: 30%;"></div>
+                <div class="sparkle" style="top: 40%; right: 25%;"></div>
+                <div class="sparkle" style="bottom: 30%; left: 40%;"></div>
+                <div class="sparkle" style="bottom: 20%; right: 35%;"></div>
+                <div class="sparkle" style="top: 60%; left: 15%;"></div>
+                <div class="sparkle" style="top: 25%; right: 45%;"></div>
+                <div class="sparkle" style="bottom: 45%; left: 60%;"></div>
+                <div class="sparkle" style="bottom: 35%; right: 15%;"></div>
+                
+                <div class="header-content">
+                    <h1>🍑 Your Mental Health Companion</h1>
+                    <p>I'm here to listen and provide supportive techniques for your wellbeing</p>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    <div class="message-content">
+                        Hello! I'm your mental health AI companion. I'm here to provide support and evidence-based techniques to help you navigate life's challenges. 
+                        
+                        <div class="techniques-section">
+                            <h4>🌟 I can help you in providing:</h4>
+                            <ul>
+                                <li>💭 Anxiety and stress management techniques</li>
+                                <li>🧘 Mindfulness exercises and self-care activities</li>
+                                <li>💪 Cope with sleep issues</li>
+                                <li>🗣️ Communication and relationship support</li>
+                            </ul>
+                        </div>
+                        
+                        What's on your mind today? I'm here to listen and help.
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Share what's troubling you..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatHistory = [];
+        let currentChatIndex = 0;
+        let sidebarVisible = true;
+        let conversations = [
+            {
+                title: "Welcome Session",
+                messages: [
+                    {
+                        type: 'ai',
+                        content: `Hello! I'm your mental health AI companion. I'm here to provide support and evidence-based techniques to help you navigate life's challenges. 
+                        
+                        <div class="techniques-section">
+                            <h4>🌟 How I can help:</h4>
+                            <ul>
+                             <li>💭 Anxiety and stress management techniques</li>
+                                <li>🧘 Mindfulness exercises and self-care activities</li>
+                                <li>💪 Cope with sleep issues</li>
+                                <li>🗣️ Communication and relationship support</li>
+                            </ul>
+                        </div>
+                        
+                        What's on your mind today? I'm here to listen and help.`
+                    }
+                ]
+            }
+        ];
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            sidebarVisible = !sidebarVisible;
+            
+            if (sidebarVisible) {
+                sidebar.classList.remove('hidden');
+                toggleBtn.classList.remove('sidebar-hidden');
+                toggleBtn.innerHTML = '☰';
+            } else {
+                sidebar.classList.add('hidden');
+                toggleBtn.classList.add('sidebar-hidden');
+                toggleBtn.innerHTML = '→';
+            }
+        }
+
+        const mentalHealthResponses = {
+            anxiety: {
+                techniques: [
+                    
+                    "Deep breathing: Inhale for 4 counts, hold for 4, exhale for 6",
+                    "Progressive muscle relaxation: Tense and release each muscle group",
+                    "Grounding technique: Name 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste",
+                    "Challenge anxious thoughts: Ask 'Is this thought helpful? Is it realistic?'",
+                    "Mindful observation: Focus on your surroundings without judgment"
+                ],
+                response: "I understand you're feeling anxious. Anxiety is a natural response, but these techniques can help you regain control:"
+            },
+            depression: {
+                techniques: [
+                    
+                    "Behavioral activation: Schedule one small pleasant activity each day",
+                    "Gratitude practice: Write down 3 things you're grateful for daily",
+                    "Gentle movement: Take a 10-minute walk or do light stretching",
+                    "Social connection: Reach out to one supportive person",
+                    "Self-compassion: Treat yourself with the kindness you'd show a friend"
+                ],
+                response: "I hear that you're struggling with difficult feelings. Depression can feel overwhelming, but these strategies can help:"
+            },
+            stress: {
+                techniques: [
+                    "Time management: Break large tasks into smaller, manageable steps",
+                    "Boundary setting: Learn to say 'no' to overwhelming commitments",
+                    "Relaxation response: Practice 10 minutes of deep breathing daily",
+                    "Physical activity: Engage in 20-30 minutes of movement",
+                    "Mindfulness meditation: Recite Quran or Calm for guidance"
+                ],
+                response: "Stress can feel overwhelming, but you have the power to manage it. Here are some effective techniques:"
+            },
+            sleep: {
+                techniques: [
+                    "Sleep hygiene: Keep consistent bedtime and wake times",
+                    "Wind-down routine: No screens 1 hour before bed",
+                    "Bedroom environment: Keep it cool, dark, and quiet",
+                    "Progressive muscle relaxation before bed",
+                    "Limit caffeine after 2 PM and avoid large meals before sleep"
+                ],
+                response: "Good sleep is crucial for mental health. Here are evidence-based techniques to improve your sleep:"
+            },
+            anger: {
+                techniques: [
+                    "Pause and breathe: Take 10 deep breaths before responding",
+                    "Physical release: Go for a walk or do jumping jacks",
+                    "Cognitive reframing: Ask 'Will this matter in 5 years?'",
+                    "Express safely: Write in a journal or talk to someone you trust",
+                    "Problem-solving: Focus on what you can control and change"
+                ],
+                response: "Anger is a valid emotion, but managing it effectively is important. Here are helpful strategies:"
+            },
+            relationships: {
+                techniques: [
+                    "Active listening: Give full attention and reflect back what you hear",
+                    "Use 'I' statements: Express feelings without blaming",
+                    "Set healthy boundaries: Clearly communicate your needs and limits",
+                    "Practice empathy: Try to understand the other person's perspective",
+                    "Regular check-ins: Schedule time to discuss relationship concerns"
+                ],
+                response: "Relationships can be challenging. Here are techniques to improve communication and connection:"
+            },
+            selfesteem: {
+                techniques: [
+                    "Daily affirmations: Write down your strengths and accomplishments",
+                    "Challenge negative self-talk: Replace criticism with compassion",
+                    "Celebrate small wins: Acknowledge every step forward",
+                    "Surround yourself with supportive people",
+                    "Practice self-care: Engage in activities that nurture your well-being"
+                ],
+                response: "Building self-esteem is a journey. Here are proven techniques to develop a healthier relationship with yourself:"
+            }
+        };
+
+        function identifyProblem(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety') || lowerMessage.includes('worried') || lowerMessage.includes('panic')) {
+                return 'anxiety';
+            } else if (lowerMessage.includes('depress') || lowerMessage.includes('sad') || lowerMessage.includes('down') || lowerMessage.includes('hopeless')) {
+                return 'depression';
+            } else if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelm') || lowerMessage.includes('pressure') || lowerMessage.includes('busy')) {
+                return 'stress';
+            } else if (lowerMessage.includes('sleep') || lowerMessage.includes('insomnia') || lowerMessage.includes('tired') || lowerMessage.includes('exhausted')) {
+                return 'sleep';
+            } else if (lowerMessage.includes('angry') || lowerMessage.includes('anger') || lowerMessage.includes('frustrated') || lowerMessage.includes('mad')) {
+                return 'anger';
+            } else if (lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('friend') || lowerMessage.includes('family')) {
+                return 'relationships';
+            } else if (lowerMessage.includes('self-esteem') || lowerMessage.includes('confidence') || lowerMessage.includes('worth') || lowerMessage.includes('failure')) {
+                return 'selfesteem';
+            }
+            
+            return 'general';
+        }
+
+        function generateResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Mental health specific responses
+            if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety') || lowerMessage.includes('worried') || lowerMessage.includes('panic')) {
+                return getAnxietyResponse();
+            } else if (lowerMessage.includes('depress') || lowerMessage.includes('sad') || lowerMessage.includes('down') || lowerMessage.includes('hopeless')) {
+                return getDepressionResponse();
+            } else if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelm') || lowerMessage.includes('pressure') || lowerMessage.includes('busy')) {
+                return getStressResponse();
+            } else if (lowerMessage.includes('sleep') || lowerMessage.includes('insomnia') || lowerMessage.includes('tired') || lowerMessage.includes('exhausted')) {
+                return getSleepResponse();
+            } else if (lowerMessage.includes('angry') || lowerMessage.includes('anger') || lowerMessage.includes('frustrated') || lowerMessage.includes('mad')) {
+                return getAngerResponse();
+            } else if (lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('friend') || lowerMessage.includes('family')) {
+                return getRelationshipResponse();
+            } else if (lowerMessage.includes('self-esteem') || lowerMessage.includes('confidence') || lowerMessage.includes('worth') || lowerMessage.includes('failure')) {
+                return getSelfEsteemResponse();
+            }
+            
+            // General conversation responses
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return "Hello! It's great to meet you. I'm here to provide support and evidence-based mental health techniques. How are you feeling today, and what would you like to talk about?";
+            } else if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+                return "You're very welcome! I'm glad I could help. Remember, taking care of your mental health is a sign of strength. Is there anything else you'd like to discuss or explore?";
+            } else if (lowerMessage.includes('how are you') || lowerMessage.includes('how do you feel')) {
+                return "Thank you for asking! As an AI, I don't have feelings, but I'm here and ready to support you. I'm designed to provide helpful mental health techniques and be a compassionate listening ear. How are you doing today?";
+            } else if (lowerMessage.includes('what can you do') || lowerMessage.includes('how can you help')) {
+                return `I'm here to provide mental health support through evidence-based techniques and strategies. Here's how I can help:
+                
+                <div class="techniques-section">
+                    <h4>🌟 My Capabilities:</h4>
+                    <ul>
+                        <li>🧠 Anxiety and stress management techniques</li>
+                        <li>💭 Cognitive behavioral strategies</li>
+                        <li>🧘 Mindfulness and relaxation exercises</li>
+                        <li>💪 Building resilience and coping skills</li>
+                        <li>🗣️ Communication and relationship advice</li>
+                        <li>💤 Sleep hygiene and wellness tips</li>
+                        <li>🎯 Goal setting and motivation support</li>
+                        <li>💬 Active listening and emotional support</li>
+                    </ul>
+                </div>
+                
+                What would you like to work on today?`;
+            } else if (lowerMessage.includes('advice') || lowerMessage.includes('help me') || lowerMessage.includes('support')) {
+                return "I'm here to help! Could you tell me more about what you're going through? Whether it's anxiety, stress, relationship issues, or just need someone to talk to, I'll provide personalized support and techniques that can help you feel better.";
+            } else if (lowerMessage.includes('feel better') || lowerMessage.includes('improve') || lowerMessage.includes('get better')) {
+                return `I'm glad you're taking steps to feel better! Here are some universal techniques that can help improve your overall wellbeing:
+                
+                <div class="techniques-section">
+                    <h4>🌈 Daily Wellness Practices:</h4>
+                    <ul>
+                        <li>🌅 Start each day with 5 minutes of deep breathing</li>
+                        <li>📝 Keep a gratitude journal - write 3 things youre thankful for</li>
+                        <li>🚶 Take short walks, especially in nature</li>
+                        <li>💧 Stay hydrated and maintain regular meals</li>
+                        <li>🤝 Connect with supportive people in your life</li>
+                        <li>🎨 Engage in activities you enjoy</li>
+                        <li>📵 Take breaks from social media and news</li>
+                    </ul>
+                </div>
+                
+                What specific area would you like to focus on?`;
+            }
+            
+            // Default response for general queries
+            return `Thank you for sharing that with me. I'm here to listen and support you. While I specialize in mental health support, I can discuss a wide range of topics that might be affecting your wellbeing.
+
+            <div class="techniques-section">
+                <h4>🌟 General Wellness Tips:</h4>
+                <ul>
+                    <li>📝"Life is either a daring adventure, or nothing."_Helen Keller</li>
+                    <li>🧘 Practice mindfulness: Take a few moments to focus on your breath</li>
+                    <li>📝 Express yourself: Writing or talking about your thoughts can help</li>
+                    <li>🌱 Take it one step at a time: Break challenges into smaller parts</li>
+                    <li>🤗 Be kind to yourself: Treat yourself with compassion</li>
+                    <li>💕Donot be sad on the words that feel so heavy</li>
+                    <li>🔄 Remember: It's okay to have difficult days</li>
+                </ul>
+            </div>
+
+            Would you like to talk more about what's on your mind? I'm here to listen and help however I can.`;
+        }
+
+        function getAnxietyResponse() {
+            return `I understand you're feeling anxious. Anxiety is a natural response, but these techniques can help you regain control:
+
+            <div class="techniques-section">
+                <h4>💡 Anxiety Management Techniques:</h4>
+                <ul>
+                  
+                    <li>🌟"O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient."(Surah Al-Baqarah Ayat 153)</li>
+                    <li>🌟 Deep breathing: Inhale for 4 counts, hold for 4, exhale for 6</li>
+                    <li>🌟 Progressive muscle relaxation: Tense and release each muscle group</li>
+                    <li>🌟 Grounding technique: Name 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste</li>
+                    <li>🌟 Challenge anxious thoughts: Ask 'Is this thought helpful? Is it realistic?'</li>
+                    <li>🌟 Mindful observation: Focus on your surroundings without judgment</li>
+                    <li>Note:</li>
+                    <li>🍑Your's is the world, you just need to control it in humble way</li>
+                    <li>🍑"Nothing in this world is permanent."</li>
+                    
+                </ul>
+            </div>`;
+        }
+
+        function getDepressionResponse() {
+            return `I hear that you're struggling with difficult feelings. Depression can feel overwhelming, but these strategies can help:
+
+            <div class="techniques-section">
+                <h4>💡 Depression Support Techniques:</h4>
+                <ul>
+                    <li>🌟 “Verily in the remembrance of Allah do hearts find rest” (Surah Ar-Ra’d Ayat 28)</li>
+                    <li>🌟 Behavioral activation: Schedule one small pleasant activity each day</li>
+                    <li>🌟 Gratitude practice: Write down 3 things youre grateful for daily</li>
+                    <li>🌟 Gentle movement: Take a 10-minute walk or do light stretching</li>
+                    <li>🌟 Social connection: Reach out to one supportive person</li>
+                    <li>🌟 Self-compassion: Treat yourself with the kindness you would show a friend</li>
+                    <li>Note:</li>
+                    <li> 🍑Make a beautiful connection with you Lord indeed He is the best listner.</li>
+                </ul>
+            </div>`;
+        }
+
+        function getStressResponse() {
+            return `Stress can feel overwhelming, but you have the power to manage it. Here are some effective techniques:
+
+            <div class="techniques-section">
+                <h4>💡 Stress Management Techniques:</h4>
+                <ul>
+                    <li>🌟 "Allah does not require of any soul more than what it can afford.(Surah Al-Baqarah Ayat 286)"</li>
+                    <li>🌟 Time management: Break large tasks into smaller, manageable steps</li>
+                    <li>🌟 Boundary setting: Learn to say 'no' to overwhelming commitments</li>
+                    <li>🌟 Relaxation response: Practice 10 minutes of deep breathing daily</li>
+                    <li>🌟 Physical activity: Engage in 20-30 minutes of movement</li>
+                    <li>🌟 Mindfulness meditation: Use apps like Headspace or Calm for guidance</li>
+                    <li>Note:</li>
+                    <li>🍑You are very precious. Your life matters alot </li>
+                    <li>🍑Don't worry about your future it's already written by the BEST CREATOR</li>
+                </ul>
+            </div>`;
+        }
+
+        function getSleepResponse() {
+            return `Good sleep is crucial for mental health. Here are evidence-based techniques to improve your sleep:
+
+            <div class="techniques-section">
+                <h4>💡 Sleep Improvement Techniques:</h4>
+                <ul>
+                    <li>🌟"He is the One Who has made the night for you as a cover, and ˹made˺ sleep for resting, and the day for rising."(Surah Al-Furqan Ayat 47)</li>
+                    <li>🌟 Sleep hygiene: Keep consistent bedtime and wake times</li>
+                    <li>🌟 Wind-down routine: No screens 1 hour before bed</li>
+                    <li>🌟 Bedroom environment: Keep it cool, dark, and quiet</li>
+                    <li>🌟 Progressive muscle relaxation before bed</li>
+                    <li>🌟 Limit caffeine after 2 PM and avoid large meals before sleep</li>
+                    <li>🌟Avoid using screens atleast 30min before sleeping</li>
+                    <li>🌟 Use scents like Lavender, chamomile, and vanilla etc for having a good sleep</li>
+                    <li>🌟 Sleep and wake at your earliest it's a best practise for improving health  </li>
+                    <li>🌟 Give your best in day and boost yourself in night. It's the charging mode don't ruin it </li>
+                    <li>Note:</li>
+                    <li>🍑Sleep routine can make you best active person or it may destroy you completely</li>
+                </ul>
+            </div>`;
+        }
+
+        function getAngerResponse() {
+            return `Anger is a valid emotion, but managing it effectively is important. Here are helpful strategies:
+
+            <div class="techniques-section">
+                <h4>💡 Anger Management Techniques:</h4>
+                <ul>
+                    <li>🌟"˹They are˺ those who donate in prosperity and adversity, control their anger, and pardon others. And Allah loves the good-doers."(Surah Al Imran Ayat 134)</li>
+                    <li>🌟 Pause and breathe: Take 10 deep breaths before responding</li>
+                    <li>🌟 Physical release: Go for a walk or do jumping jacks</li>
+                    <li>🌟 Cognitive reframing: Ask 'Will this matter in 5 years?'</li>
+                    <li>🌟 Express safely: Write in a journal or talk to someone you trust</li>
+                    <li>🌟 Problem-solving: Focus on what you can control and change</li>
+                    <li>🌟 Engage yourself in the activities that make you happy</li>
+                    <li>🌟 Take a flavoured drink espically Mint or any other that you like</li>
+                    <li>Note:</li>
+                    <li>🍑 Due to anger you may lose you'r happy part, it may destroy you internally without giving any harm to others. </li>
+                    <li>🍑Your Life matters alot. Be happy for youself.</li> 
+                    </ul>
+            </div>`;
+        }
+
+        function getRelationshipResponse() {
+            return `Relationships can be challenging. Here are techniques to improve communication and connection:
+
+            <div class="techniques-section">
+                <h4>💡 Relationship Support Techniques:</h4>
+                <ul>
+                    <li>🌟"And be mindful of Allah—in Whose Name you appeal to one another—and ˹honour˺ family ties. Surely Allah is ever Watchful over you."(Surah Nisa Ayat 1)</li>
+                    <li>🌟 Active listening: Give full attention and reflect back what you hear</li>
+                    <li>🌟 Use 'I' statements: Express feelings without blaming</li>
+                    <li>🌟 Set healthy boundaries: Clearly communicate your needs and limits</li>
+                    <li>🌟 "Practice empathy: Try to understand the other person's perspective"</li>
+                    <li>🌟 Regular check-ins: Schedule time to discuss relationship concerns</li>
+                    <li>🌟 Maintain a good friendly environment around yourself</li>
+                    <li>🌟 Normalize giving greetings on even small occasions</li>
+                    <li>🌟 Spread happiness in you family, friends, neighbours and around you giving stressed one the hope of new life</li>
+                    <li>Note:</li>
+                    <li>🍑 Be the reason someone starts smiling</li>
+
+                </ul>
+            </div>`;
+        }
+
+        function getSelfEsteemResponse() {
+            return `Building self-esteem is a journey. Here are proven techniques to develop a healthier relationship with yourself:
+
+            <div class="techniques-section">
+                <h4>💡 Self-Esteem Building Techniques:</h4>
+                <ul>
+                    <li>🌟"Indeed, We created humans in the best form."(Surah At-Teen Ayat 4)</li>
+                    <li>🌟 Daily affirmations: Write down your strengths and accomplishments</li>
+                    <li>🌟 Challenge negative self-talk: Replace criticism with compassion</li>
+                    <li>🌟 Celebrate small wins: Acknowledge every step forward</li>
+                    <li>🌟 Surround yourself with supportive people</li>
+                    <li>🌟 Practice self-care: Engage in activities that nurture your well-being</li>
+                    <li>🌟 Give yourself a Highfive every morning and start a day with great energy</li>
+                    <li>🌟 Stop comparing yourself with other you are especial at your place no one is like you</li>
+                    <li>Note:</li>
+                    <li>🍑 You are  already blessed with alot of the things you just need to see them through the vision of your heart</li>
+                </ul>
+            </div>`;
+        }
+
+        function addMessage(content, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content;
+            
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Add to current conversation
+            conversations[currentChatIndex].messages.push({
+                type: type,
+                content: content
+            });
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, 'user');
+                input.value = '';
+                
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const aiResponse = generateResponse(message);
+                    addMessage(aiResponse, 'ai');
+                }, 1500);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function newChat() {
+            const newChatTitle = `Chat ${conversations.length + 1}`;
+            const newConversation = {
+                title: newChatTitle,
+                messages: [{
+                    type: 'ai',
+                    content: "`Hello! I'm here to support you today. What would you like to talk about?`"
+                }]
+            };
+            
+            conversations.push(newConversation);
+            currentChatIndex = conversations.length - 1;
+            
+            updateChatHistory();
+            loadCurrentChat();
+        }
+
+        function loadHistory(index) {
+            currentChatIndex = index;
+            loadCurrentChat();
+        }
+
+        function loadCurrentChat() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '<div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>';
+            
+            const currentConversation = conversations[currentChatIndex];
+            
+            currentConversation.messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.type}-message`;
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = message.content;
+                
+                messageDiv.appendChild(messageContent);
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function updateChatHistory() {
+            const historyContainer = document.getElementById('chatHistory');
+            historyContainer.innerHTML = '';
+            
+            conversations.forEach((conversation, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.textContent = conversation.title;
+                historyItem.onclick = () => loadHistory(index);
+                
+                if (index === currentChatIndex) {
+                    historyItem.style.background = 'rgba(255,255,255,0.6)';
+                }
+                
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        // Initialize
+        updateChatHistory();
+    </script>
+</body>
+</html>
